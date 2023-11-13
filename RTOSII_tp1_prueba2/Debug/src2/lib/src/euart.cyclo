@@ -1,0 +1,9 @@
+euart.c:16:6:hal_receive_	1
+euart.c:21:6:hal_send_	1
+euart.c:28:6:euart_init	1
+euart.c:38:8:euart_write_buffer_len	1
+euart.c:43:8:euart_write	2
+euart.c:53:8:euart_read_buffer_len	1
+euart.c:58:8:euart_read	1
+euart.c:63:6:euart_rx_irq	3
+euart.c:77:6:euart_tx_irq	3

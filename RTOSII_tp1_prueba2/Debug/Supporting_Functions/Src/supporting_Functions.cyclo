@@ -1,0 +1,4 @@
+supporting_Functions.c:116:1:__io_putchar	1
+supporting_Functions.c:127:6:vPrintString	1
+supporting_Functions.c:140:6:vPrintStringAndNumber	1
+supporting_Functions.c:153:6:vPrintTwoStrings	1

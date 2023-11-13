@@ -1,0 +1,9 @@
+../src2/lib/src/euart.c:16:6:hal_receive_	16	static
+../src2/lib/src/euart.c:21:6:hal_send_	24	static
+../src2/lib/src/euart.c:28:6:euart_init	24	static
+../src2/lib/src/euart.c:38:8:euart_write_buffer_len	16	static
+../src2/lib/src/euart.c:43:8:euart_write	32	static
+../src2/lib/src/euart.c:53:8:euart_read_buffer_len	16	static
+../src2/lib/src/euart.c:58:8:euart_read	24	static
+../src2/lib/src/euart.c:63:6:euart_rx_irq	24	static
+../src2/lib/src/euart.c:77:6:euart_tx_irq	16	static
