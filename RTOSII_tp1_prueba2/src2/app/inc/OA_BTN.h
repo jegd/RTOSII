@@ -1,39 +1,41 @@
 /*
- * OA_BTN.h
+ *  OA_BTN.h
  *
- *  Created on: Nov 12, 2023
- *      Author: Compumax
+ *  @Created on: Nov 12, 2023
+ *  @Authors:  Edda     Andrade                N°SIU e2014
+ *             Anthony  Maisincho              N°SIU e2011
+ *             Jesus    Gonzales               N°SIU e2006
  */
 
 #ifndef APP_INC_OA_BTN_H_
 #define APP_INC_OA_BTN_H_
 
+/****************************INCLUDES****************************/
 #include "main.h"
 #include "cmsis_os.h"
-
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include "eboard.h"
 #include "supporting_Functions.h"
-
-#define R 1 //Rising Edge
-#define F 0 //Falling Edge
-
-extern volatile uint32_t RisingUp_Time; //tick de tiempo en el que se produce el rising edge variable global pública y volátil (no optimizada)
-extern volatile uint32_t FallingDown_Time; //tick de tiempo en el que se produce el falling edge variable global pública y volátil (no optimizada)
-extern enum Btn_Status Btn_State;
-
-
-
-
-extern QueueHandle_t QueueBtnStatus; //cola para enviar el estado del botón a los leds
-extern BaseType_t sd;
-
+/****************************VARIABLES****************************/
+extern volatile uint32_t RisingUp_Time; //Tick de tiempo en el que se produce el rising edge variable global pública y volátil (no optimizada)
+extern volatile uint32_t FallingDown_Time; //Tick de tiempo en el que se produce el falling edge variable global pública y volátil (no optimizada)
+extern enum Btn_Status Btn_State; //Estado del botón de usuario
+extern QueueHandle_t QueueBtnStatus; //Cola para enviar el estado del botón a los leds
+extern BaseType_t sd; //Variable para verificar el correcto encolado de la notificación
+//Enumeración con los estados del botón
 enum Btn_Status {
 	SHORTPRESSED, LONGPRESSED, BLOCKED, UNBLOCKED, NONE
 };
-
+//Tarea objeto activo
+/*!
+ * @brief Tarea del Objeto activo botón.
+ *
+ * @param[void *] Puntero a parámetros.
+ *
+ * @return Función del tipo void.
+ */
 extern void vTask_OA_BTN(void *pvParameters);
 
 #endif /* APP_INC_OA_BTN_H_ */

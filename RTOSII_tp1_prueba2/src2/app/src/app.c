@@ -18,8 +18,11 @@ xTaskHandle vTask_OA_BTNHandle;
 xTaskHandle vTask_OA_LEDSHandle;
 
 // ------ internal data definition -------------------------------------
-//const char *pcTextForMain = "Edda Andrade - RTOS II TP1-Parte A is running \r\n\n";
-const char *pcTextForMain = "Edda Andrade - RTOS II TP 1 Parte A is running \r\n\n";
+//Texto de inicialización
+const char *pcTextForMain = "*******RTOS II TP 1 Parte A is running******* \r\n"
+		                    "- Edda     Andrade                N°SIU e2014\r\n"
+		                    "- Anthony  Maisincho              N°SIU e2011 \r\n"
+		                    "- Jesus    Gonzales               N°SIU e2006\r\n";
 //Inicia las tareas de los OA
 
 	/* App Initialization */
@@ -27,7 +30,6 @@ void app_init( void ){
 		  	vPrintString( pcTextForMain );
 
 		    // drivers
-
 		    {
 		      eboard_init();
 		    }
