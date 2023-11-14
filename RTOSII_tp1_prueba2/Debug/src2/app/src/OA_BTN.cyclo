@@ -1,3 +1,4 @@
 OA_BTN.c:44:6:HAL_GPIO_EXTI_Callback	3
 OA_BTN.c:63:13:resetear_parametros	2
-OA_BTN.c:83:6:vTask_OA_BTN	14
+OA_BTN.c:81:6:process_button_state	13
+OA_BTN.c:124:6:vTask_OA_BTN	2

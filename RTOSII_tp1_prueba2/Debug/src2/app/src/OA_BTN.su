@@ -1,3 +1,4 @@
 ../src2/app/src/OA_BTN.c:44:6:HAL_GPIO_EXTI_Callback	16	static
 ../src2/app/src/OA_BTN.c:63:13:resetear_parametros	8	static
-../src2/app/src/OA_BTN.c:83:6:vTask_OA_BTN	16	static
+../src2/app/src/OA_BTN.c:81:6:process_button_state	16	static
+../src2/app/src/OA_BTN.c:124:6:vTask_OA_BTN	16	static

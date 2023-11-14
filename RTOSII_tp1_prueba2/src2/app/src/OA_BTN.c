@@ -71,6 +71,47 @@ static void resetear_parametros(void) {
 	else
 		Btn_State = UNBLOCKED;
 }
+/*!
+ * @brief Función para procesar el estado del botón.
+ *
+ * @param[enum Btn_Status] Estado del botón
+ *
+ * @return Función del tipo void.
+ */
+void process_button_state(enum Btn_Status estadoButton)
+{
+	switch (estadoButton) {
+			case SHORTPRESSED:
+				resetear_parametros();
+				break;
+			case LONGPRESSED:
+				resetear_parametros();
+				break;
+			case BLOCKED:
+				if (rising_flag)
+					resetear_parametros();
+				break;
+			case UNBLOCKED:
+				resetear_parametros();
+				break;
+			case NONE:
+				if (100 < BtnPressed_Time && BtnPressed_Time < 2000)
+					Btn_State = SHORTPRESSED;
+
+				else if (2000 < BtnPressed_Time && BtnPressed_Time < 8000)
+					Btn_State = LONGPRESSED;
+
+				else if (RisingUp_Time != 0
+						&& ((HAL_GetTick() / portTICK_PERIOD_MS - RisingUp_Time)
+								>= 8000))
+					Btn_State = BLOCKED;
+				break;
+			default:
+				Btn_State = NONE;
+				break;
+
+			}
+}
 
 //Tarea objeto activo botón
 /*!
@@ -90,7 +131,6 @@ void vTask_OA_BTN(void *pvParameters) {
 		 */
 		if (rising_flag)
 			BtnPressed_Time = FallingDown_Time - RisingUp_Time;
-
 		/*
 		 * Procesado del estado del botón de usuario
 		 *
@@ -100,37 +140,8 @@ void vTask_OA_BTN(void *pvParameters) {
 		 * UNBLOCKED: El botón estuvo en estado BLOCKED y posteriormente se liberó.
 		 * NONE: El botón no fue presionado.
 		 */
-		switch (Btn_State) {
-		case SHORTPRESSED:
-			resetear_parametros();
-			break;
-		case LONGPRESSED:
-			resetear_parametros();
-			break;
-		case BLOCKED:
-			if (rising_flag)
-				resetear_parametros();
-			break;
-		case UNBLOCKED:
-			resetear_parametros();
-			break;
-		case NONE:
-			if (100 < BtnPressed_Time && BtnPressed_Time < 2000)
-				Btn_State = SHORTPRESSED;
+		process_button_state(Btn_State);
 
-			else if (2000 < BtnPressed_Time && BtnPressed_Time < 8000)
-				Btn_State = LONGPRESSED;
-
-			else if (RisingUp_Time != 0
-					&& ((HAL_GetTick() / portTICK_PERIOD_MS - RisingUp_Time)
-							>= 8000))
-				Btn_State = BLOCKED;
-			break;
-		default:
-			Btn_State = NONE;
-			break;
-
-		}
 		/*
 		 * Se encola la notificación del estado del botón
 		 * objeto activo para ser leída por el objeto activo led.
