@@ -21,7 +21,8 @@ static struct {
 	size_t client_cnt;
 } atencion;
 
-#define TASK_PERIOD_MS_         (10*1000)
+//#define TASK_PERIOD_MS_         (10*1000)
+#define TASK_PERIOD_MS_         (10)
 //Tarea objeto activo led
 /*!
  * @brief Tarea del Objeto activo botón.
@@ -138,32 +139,20 @@ void vTask_OA_LEDS(void *pvParameters) {
 		/*
 		 * Recibe el estado del botón de la cola y lo envía a la variable Received
 		 */
-		/*
-		 if(pdPASS==xQueueReceive(QueueLEDS, &color_recibido, xDelay10000ms))
-		 {
-		 //ok
-		 vPrintString("color recibido");
-		 }
-		 if(pdPASS==xQueueReceive(QueueLEDS, &estado_recibido, xDelay10000ms))
-		 {
-		 vPrintString("estado recibido");
-		 }
-		 */
-		if (pdPASS== xQueueReceive(QueueLEDS, &codigo_recibido, xDelay10000ms)) {
-
+		if (pdPASS== xQueueReceive(QueueLEDS, &codigo_recibido, 0)) {
+			 if (pdPASS == xQueueSend(atencion.hclient_queue, (void* )&codigo_recibido, 0))
+					  {
+					    // ok
+					    ELOG("Ingresa el cliente [%i] a la fila", codigo_recibido);
+					    if(0 == atencion.task_cnt)
+					    {
+					      task_create_();
+					    }
+					  }
 			//ok
 			vPrintStringAndNumber("color recibido", (uint32_t) codigo_recibido);
 		}
-		  if (pdPASS == xQueueSend(atencion.hclient_queue, (void* )&codigo_recibido, 0))
-		  {
-		    // ok
-		    ELOG("Ingresa el cliente [%i] a la fila", codigo_recibido);
-		    if(0 == atencion.task_cnt)
-		    {
-		      task_create_();
-		    }
-		    //return true;
-		  }
+
 
 		//Revisar que el mensaje se halla encolado correctamente.
 		//configASSERT(&rv != NULL);

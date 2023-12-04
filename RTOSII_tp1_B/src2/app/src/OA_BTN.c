@@ -25,13 +25,14 @@ const char *OABTN_WelcomeMsg = "OA_BTN se está ejecutando\r\n"; //Mensaje de bi
 volatile uint32_t RisingUp_Time = 0; //Marcador de tiempo del flanco de subida del botón.
 volatile uint32_t FallingDown_Time = 0; //Marcador de tiempo del flanco de bajada del botón.
 volatile int32_t BtnPressed_Time = 0; //Tiempo que el pulsador estuvo presionado.
-enum Btn_Status Btn_State; //Estado del botón.
+enum Btn_Status Btn_State = NONE; //Estado del botón.
 BaseType_t sd; //Variable para verificar el correcto encolado de la notificación
 /****************************VARIABLES INTERNAS****************************/
 static bool rising_flag = 0;       //Flag que indica que hubo flanco ascendente.
 static uint32_t aux = 0;                          //Marcador auxiliar de tiempo.
 
 debounceState_t boton;
+bool unaVezBlockeado=0;
 //static delay_t delay_1;
 //static tick_t duracion_1=20/portTICK_PERIOD_MS;
 // INTERRUPCIÓN
@@ -95,7 +96,11 @@ void process_button_state(enum Btn_Status estadoButton)
 					resetear_parametros();
 				break;
 			case UNBLOCKED:
-				resetear_parametros();
+				//if (unaVezBlockeado)
+					//	resetear_parametros();
+
+				unaVezBlockeado=0;
+				//resetear_parametros();
 				break;
 			case NONE:
 				if (100 < BtnPressed_Time && BtnPressed_Time < 2000)
@@ -166,9 +171,22 @@ void vTask_OA_BTN(void *pvParameters) {
 		 * Se encola la notificación del estado del botón
 		 * objeto activo para ser leída por el objeto activo led.
 		 */
-		sd = xQueueSend(QueueBtnStatus, &Btn_State, portMAX_DELAY);
+		//if(Btn_State!=NONE)
+		//sd = xQueueSend(QueueBtnStatus, &Btn_State, portMAX_DELAY);
+		if(Btn_State!=NONE && unaVezBlockeado!=1)
+		{
+			if(Btn_State==BLOCKED)
+				unaVezBlockeado=1;
+
+			sd = xQueueSend(QueueBtnStatus, &Btn_State, 0);
+			if(Btn_State==UNBLOCKED)
+				resetear_parametros();
+			assert(sd != 0);
+		}
+
+
 		//Revisar que el mensaje se halla encolado correctamente.
-		assert(sd != 0);
+		//
 	}
 }
 

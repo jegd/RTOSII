@@ -15,7 +15,7 @@
 #include "OA_SYS.h"
 #include "eboard.h"
 #define QUEUE_BUTTON_LENGHT (1)
-#define QUEUE_LEDS_LENGHT (2)
+#define QUEUE_LEDS_LENGHT (1)
 xTaskHandle vTask_OA_BTNHandle;
 xTaskHandle vTask_OA_LEDSHandle;
 xTaskHandle vTask_OA_SYSHandle;
