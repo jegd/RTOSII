@@ -30,32 +30,9 @@ BaseType_t sd; //Variable para verificar el correcto encolado de la notificació
 /****************************VARIABLES INTERNAS****************************/
 static bool rising_flag = 0;       //Flag que indica que hubo flanco ascendente.
 static uint32_t aux = 0;                          //Marcador auxiliar de tiempo.
-
 debounceState_t boton;
-bool unaVezBlockeado=0;
-//static delay_t delay_1;
-//static tick_t duracion_1=20/portTICK_PERIOD_MS;
-// INTERRUPCIÓN
-/*!
- * @brief Función que maneja por interrupción el botón de la tarjeta de desarrollo
- *        detecta el flanco de subida y el flanco de bajada.
- *
- * @param[uint16_t] GPIO_Pin  Número de pin del GPIO de interrupción .
- *
- * @return Función del tipo void.
- */
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
-	/*
-	aux = HAL_GetTick() / portTICK_PERIOD_MS; //Guarda el tiempo en el que se llama al callback.
-	if (eboard_switch()) {
-		RisingUp_Time = aux;
-		rising_flag = 0;
-		FallingDown_Time = 0;
-	} else if (!eboard_switch()) {
-		FallingDown_Time = aux;
-		rising_flag = 1;
-	}*/
-}
+bool unaVezBlockeado = 0;
+bool buttonChange = 0;
 /*!
  * @brief Función para resetear las variables de tiempo, flag de flanco descendente
  *        e escritura de mensaje por UART.
@@ -67,13 +44,11 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 static void resetear_parametros(void) {
 	RisingUp_Time = 0;
 	FallingDown_Time = 0;
-	BtnPressed_Time = 0;
-	rising_flag = 0;
-	//vPrintString(messages[Btn_State]); //Envío de mensaje por UART del estado del botón
 	if (Btn_State != BLOCKED)
-		Btn_State = NONE;
-	else
-		Btn_State = UNBLOCKED;
+		BtnPressed_Time = 0;
+	rising_flag = 0;
+	buttonChange = 0;
+	Btn_State = NONE;
 }
 /*!
  * @brief Función para procesar el estado del botón.
@@ -82,60 +57,61 @@ static void resetear_parametros(void) {
  *
  * @return Función del tipo void.
  */
-void process_button_state(enum Btn_Status estadoButton)
-{
+static void process_button_state(enum Btn_Status estadoButton) {
 	switch (estadoButton) {
-			case SHORTPRESSED:
-				resetear_parametros();
-				break;
-			case LONGPRESSED:
-				resetear_parametros();
-				break;
-			case BLOCKED:
-				if (!rising_flag)
-					resetear_parametros();
-				break;
-			case UNBLOCKED:
-				//if (unaVezBlockeado)
-					//	resetear_parametros();
+	case SHORTPRESSED:
+		resetear_parametros();
+		break;
+	case LONGPRESSED:
+		resetear_parametros();
+		break;
+	case BLOCKED:
+		if (!rising_flag)
+			resetear_parametros();
+		buttonChange = 0;
+		break;
+	case UNBLOCKED:
+		resetear_parametros();
+		break;
+	case NONE:
+		if (100 < BtnPressed_Time && BtnPressed_Time < 2000) {
+			Btn_State = SHORTPRESSED;
+			buttonChange = 1;
+		}
 
-				unaVezBlockeado=0;
-				//resetear_parametros();
-				break;
-			case NONE:
-				if (100 < BtnPressed_Time && BtnPressed_Time < 2000)
-					Btn_State = SHORTPRESSED;
+		else if (2000 < BtnPressed_Time && BtnPressed_Time < 8000) {
+			Btn_State = LONGPRESSED;
+			buttonChange = 1;
+		} else if (BtnPressed_Time >= 8000) {
+			buttonChange = 1;
+			Btn_State = UNBLOCKED;
+		} else if (RisingUp_Time != 0
+				&& ((HAL_GetTick() / portTICK_PERIOD_MS - RisingUp_Time) >= 8000)) {
+			buttonChange = 1;
+			Btn_State = BLOCKED;
+		}
 
-				else if (2000 < BtnPressed_Time && BtnPressed_Time < 8000)
-					Btn_State = LONGPRESSED;
+		break;
+	default:
+		Btn_State = NONE;
+		break;
 
-				else if (RisingUp_Time != 0
-						&& ((HAL_GetTick() / portTICK_PERIOD_MS - RisingUp_Time)
-								>= 8000))
-					Btn_State = BLOCKED;
-				break;
-			default:
-				Btn_State = NONE;
-				break;
-
-			}
+	}
 }
 
-void leerBoton()
-{
+static void updateButton() {
 	aux = HAL_GetTick() / portTICK_PERIOD_MS; //Guarda el tiempo en el que se llama al callback.
 	debounceFSM_update(&boton);
-	if (boton==BUTTON_DOWN&&!rising_flag) {
+	if (boton == BUTTON_DOWN && !rising_flag) {
 		RisingUp_Time = aux;
 		rising_flag = 1;
 		FallingDown_Time = 0;
-	} else if (boton==BUTTON_UP &&rising_flag) {
+	} else if (boton == BUTTON_UP && rising_flag) {
 		FallingDown_Time = aux;
 		BtnPressed_Time = FallingDown_Time - RisingUp_Time;
 		rising_flag = 0;
 	}
 }
-
 
 //Tarea objeto activo botón
 /*!
@@ -147,15 +123,13 @@ void leerBoton()
  */
 void vTask_OA_BTN(void *pvParameters) {
 	vPrintString(OABTN_WelcomeMsg);
-	//delayInit(&delay_1,duracion_1);
 	debounceFSM_init(&boton);
 	while (1) {
 
 		/*
-		 * La resta que determina el tiempo que llevó presionado el botón se realiza
-		 * cuando se ha detectado un flanco ascendete del botón de usuario.
+		 * Actualiza el estado del botón
 		 */
-		leerBoton();
+		updateButton();
 		/*
 		 * Procesado del estado del botón de usuario
 		 *
@@ -166,31 +140,15 @@ void vTask_OA_BTN(void *pvParameters) {
 		 * NONE: El botón no fue presionado.
 		 */
 		process_button_state(Btn_State);
-
 		/*
 		 * Se encola la notificación del estado del botón
-		 * objeto activo para ser leída por el objeto activo led.
+		 * objeto activo para ser leída por el objeto activo sys.
 		 */
-		//if(Btn_State!=NONE)
-		//sd = xQueueSend(QueueBtnStatus, &Btn_State, portMAX_DELAY);
-		if(Btn_State!=NONE && unaVezBlockeado!=1)
-		{
-			if(Btn_State==BLOCKED)
-				unaVezBlockeado=1;
-
+		if (Btn_State != NONE && buttonChange != 0) {
 			sd = xQueueSend(QueueBtnStatus, &Btn_State, 0);
-			if(Btn_State==UNBLOCKED)
-				resetear_parametros();
-			assert(sd != 0);
+			assert(sd != 0); //Revisar que el mensaje se halla encolado correctamente.
 		}
 
-
-		//Revisar que el mensaje se halla encolado correctamente.
-		//
 	}
 }
-
-
-
-
 

@@ -8,20 +8,18 @@
 
 #ifndef APP_INC_OA_LEDS_H_
 #define APP_INC_OA_LEDS_H_
-
-#include "main.h"
-#include "cmsis_os.h"
-
+/****************************INCLUDES****************************/
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include "main.h"
+#include "cmsis_os.h"
 #include "eboard.h"
 #include "supporting_Functions.h"
-
 #include "app.h"
 #include "OA_BTN.h"
 #include "OA_SYS.h"
-
-extern void vTask_OA_LEDS(void *pvParameters);
+/****************************FUNCIONES****************************/
+void vTask_OA_LEDS(void *pvParameters);
 
 #endif /* APP_INC_OA_LEDS_H_ */

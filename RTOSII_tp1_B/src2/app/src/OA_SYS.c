@@ -5,38 +5,36 @@
  *      Author: Jesus
  */
 #include "OA_SYS.h"
-color_led led_a_enviar;
-estado_led estado_a_enviar;
 extern QueueHandle_t QueueLEDS;
 codigo_t codigo_a_enviar;
-
-void sendToLeds(color_led color, estado_led estado)
-{
-	if(pdPASS==xQueueSend(QueueLEDS, &color, portMAX_DELAY))
-	{
-		//ok
-	}
-	if(pdPASS==xQueueSend(QueueLEDS, &estado, portMAX_DELAY))
-	{
-			//ok
-	}
-
-}
-void sendToLeds_cod(codigo_t codigo)
+/*!
+ * @brief Manda el código de led por medio de la cola de leds
+ *
+ * @param[codigo_t ] El código del estado que debe tener el led
+ *
+ * @return Función del tipo void.
+ */
+static void sendToLeds_cod(codigo_t codigo)
 {
 	if(pdPASS==xQueueSend(QueueLEDS, &codigo, 0))
 	{
 		//ok
 	}
+	else
+	{
+		ELOG("Error!!!");//error
+	}
 
 }
-
+/*!
+ * @brief OA_SYS procesa el código recibido del botón
+ * @param[void *] Puntero a parámetros.
+ * @return Función del tipo void.
+ */
 void vTask_OA_SYS(void *pvParameters)
 {
 
 	enum Btn_Status estadoBoton; //Variable que almacena la notificación de la cola que contiene el estado del botón
-	//const TickType_t xDelay10000ms = pdMS_TO_TICKS(10000UL); //xTicksToWait de la cola
-	//vPrintString(OALEDS_WelcomeMsg);
 
 	while(1)
 	{
@@ -61,7 +59,7 @@ void vTask_OA_SYS(void *pvParameters)
 				case UNBLOCKED: //Apagar los dos leds
 					sendToLeds_cod(BOTH_OFF);
 					break;
-				case NONE: //No se presionó el botón
+				case NONE:
 					//No realiza nada
 					break;
 				default:
@@ -71,6 +69,10 @@ void vTask_OA_SYS(void *pvParameters)
 				}
 
 		}
+		else
+			{
+				ELOG("Error!!!");//error
+			}
 	}
 
 }

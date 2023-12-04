@@ -28,7 +28,7 @@ extern BaseType_t sd; //Variable para verificar el correcto encolado de la notif
 enum Btn_Status {
 	SHORTPRESSED, LONGPRESSED, BLOCKED, UNBLOCKED, NONE
 };
-//Tarea objeto activo
+/****************************FUNCIONES****************************/
 /*!
  * @brief Tarea del Objeto activo botón.
  *

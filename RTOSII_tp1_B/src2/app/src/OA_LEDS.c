@@ -9,9 +9,8 @@
 
 /****************************INCLUDES****************************/
 #include "OA_LEDS.h"
-/****************************VARIABLES GLOBALES****************************/
-
-#define MAX_THREADS_ 6
+/****************************DEFINES Y MACROS****************************/
+#define MAX_THREADS_ 1
 QueueHandle_t QueueLED_hijo;
 extern QueueHandle_t QueueLEDS;
 static struct {
@@ -20,155 +19,149 @@ static struct {
 	size_t task_cnt;
 	size_t client_cnt;
 } atencion;
-
-//#define TASK_PERIOD_MS_         (10*1000)
-#define TASK_PERIOD_MS_         (10)
-//Tarea objeto activo led
+#define TASK_PERIOD_MS_         (10)				//Tiempo que toma atender al led
 /*!
- * @brief Tarea del Objeto activo botón.
+ * @brief Callback para manejar los leds usando el código encolado
  *
- * @param[void *] Puntero a parámetros.
+ * @param[codigo_t ] El código del estado que debe tener el led
  *
  * @return Función del tipo void.
  */
-void callbackLEDS(codigo_t cod) {
+static void callbackLEDS(codigo_t cod) {
 	switch (cod) {
 	case GREEN_ON:
 		eboard_led_green(1);
 		break;
 	case GREEN_OFF:
 		eboard_led_green(0);
-			break;
+		break;
 	case RED_ON:
 		eboard_led_red(1);
-			break;
+		break;
 	case RED_OFF:
 		eboard_led_red(0);
-			break;
+		break;
 	case BOTH_ON:
 		eboard_led_red(1);
 		eboard_led_green(1);
-				break;
+		break;
 	case BOTH_OFF:
 		eboard_led_red(0);
 		eboard_led_green(0);
-				break;
+		break;
 	}
 }
-
-static void task_delete_(void)
-{
-  ELOG("Borro una tarea");
-  atencion.task_cnt--;
-  ELOG("Cantidad de tareas: %d", atencion.task_cnt);
-
-  vTaskDelete(NULL);
+/*!
+ * @brief Elimina la tarea hijo
+ *
+ * @return Función del tipo void.
+ */
+static void task_delete_(void) {
+	ELOG("Borro una tarea");
+	atencion.task_cnt--;
+	ELOG("Cantidad de tareas: %d", atencion.task_cnt);
+	vTaskDelete(NULL);
 }
-
-static void task_(void* argument)
-{
+/*!
+ * @brief Task para llamar al callback mientras hayan clientes sin atender en la cola
+ *@param[void *] Puntero a parámetros.
+ * @return Función del tipo void.
+ */
+static void task_(void *argument) {
 	codigo_t client;
-  while (true)
-  {
-    while (pdPASS == xQueueReceive(atencion.hclient_queue, &client, 0))
-    {
-      ELOG("Llamo al cliente: [%i]", client);
+	while (true) {
+		while (pdPASS == xQueueReceive(atencion.hclient_queue, &client, 0)) {
+			ELOG("Código del estado del led: [%i]", client);
 
-    atencion.client_cnt++;
-      ELOG("Cantidad de clientes siendo atendidos: %d", atencion.client_cnt);
+			atencion.client_cnt++;
+			ELOG("Cantidad de estados leds siendo atendidos: %d", atencion.client_cnt);
 
-      atencion.callback(client);
-      vTaskDelay((TickType_t)(TASK_PERIOD_MS_ / portTICK_PERIOD_MS));
-      ELOG("Fin de la atención del cliente: [%i]", client);
+			atencion.callback(client);
+			//Tiempo que toma atender a un item led de la cola
+			vTaskDelay((TickType_t) (TASK_PERIOD_MS_ / portTICK_PERIOD_MS));
+			ELOG("Fin de la atención del led: [%i]", client);
 
-      atencion.client_cnt--;
-      ELOG("Cantidad de clientes siendo atendidos: %d", atencion.client_cnt);
-    }
-    task_delete_();
-  }
+			atencion.client_cnt--;
+			ELOG("Cantidad de estados leds siendo atendidos: %d", atencion.client_cnt);
+		}
+		task_delete_();
+	}
 }
-
-
-static bool task_create_(void)
-{
-  if(atencion.task_cnt < MAX_THREADS_)
-  {
-    ELOG("Creo una tarea");
-    atencion.task_cnt++;
-    ELOG("Cantidad de tareas: %d", atencion.task_cnt);
-    BaseType_t status;
-    status = xTaskCreate(task_, "task_bank", 128, NULL, tskIDLE_PRIORITY + 2, NULL);
-    while (pdPASS != status)
-    {
-      ELOG("Error!!!");
-      // error
-    }
-    return true;
-  }
-  else
-  {
-    ELOG("No puedo crear nuevas tareas");
-    return false;
-  }
+/*!
+ * @brief Crea un task dinámico
+ *
+ * @return Función del tipo void.
+ */
+static bool task_create_(void) {
+	if (atencion.task_cnt < MAX_THREADS_)
+	{
+		ELOG("Creo una tarea");
+		atencion.task_cnt++;
+		ELOG("Cantidad de tareas: %d", atencion.task_cnt);
+		BaseType_t status;
+		status = xTaskCreate(task_, "task_bank", 128, NULL,
+				tskIDLE_PRIORITY + 1, NULL);
+		while (pdPASS != status)
+		{
+			ELOG("Error!!!");
+			// error
+		}
+		return true;
+	}
+	else
+	{
+		ELOG("No puedo crear nuevas tareas");
+		return false;
+	}
 }
-
-
+/*!
+ * @brief Crea un task dinámico
+ * @param[void *] Puntero a parámetros.
+ * @return Función del tipo void.
+ */
 void vTask_OA_LEDS(void *pvParameters) {
 
-	BaseType_t rv; //Variable para verificar el correcto encolado de la notificación
-	color_led color_recibido; //Variable que almacena la notificación de la cola que contiene el estado del botón
-	estado_led estado_recibido;
 	codigo_t codigo_recibido;
-	const TickType_t xDelay10000ms = pdMS_TO_TICKS(10000UL); //xTicksToWait de la cola
-	//vPrintString(OALEDS_WelcomeMsg);
 
-	/*Creación de colas*/
-	QueueLED_hijo = xQueueCreate(4,sizeof(codigo_t));
+	/*Creación de cola para task hijo*/
+	QueueLED_hijo = xQueueCreate(4, sizeof(codigo_t));
 
-		/* Check the queues was created successfully */
-		configASSERT( QueueLED_hijo != NULL );
+	/* Check the queues was created successfully */
+	configASSERT(QueueLED_hijo != NULL);
 
-		/* We want this queue to be viewable in a RTOS kernel aware debugger, so register it. */
-		vQueueAddToRegistry( QueueLED_hijo, "QueueLED_hijo" );
+	/* We want this queue to be viewable in a RTOS kernel aware debugger, so register it. */
+	vQueueAddToRegistry(QueueLED_hijo, "QueueLED_hijo");
 
-		atencion.hclient_queue = QueueLED_hijo;
-			atencion.callback = callbackLEDS;
+	atencion.hclient_queue = QueueLED_hijo;
+	atencion.callback = callbackLEDS;
 
 	while (1) {
 
 		/*
-		 * Recibe el estado del botón de la cola y lo envía a la variable Received
+		 * Recibe el estado del botón de la cola y lo envía a la cola de atención
 		 */
-		if (pdPASS== xQueueReceive(QueueLEDS, &codigo_recibido, 0)) {
-			 if (pdPASS == xQueueSend(atencion.hclient_queue, (void* )&codigo_recibido, 0))
-					  {
-					    // ok
-					    ELOG("Ingresa el cliente [%i] a la fila", codigo_recibido);
-					    if(0 == atencion.task_cnt)
-					    {
-					      task_create_();
-					    }
-					  }
-			//ok
-			vPrintStringAndNumber("color recibido", (uint32_t) codigo_recibido);
+		if (pdPASS == xQueueReceive(QueueLEDS, &codigo_recibido, 0))
+		{
+			if (pdPASS== xQueueSend(atencion.hclient_queue,(void* )&codigo_recibido, 0))
+			{
+				ELOG("Ingresa el cliente [%i] a la fila", codigo_recibido);
+				if (0 == atencion.task_cnt)
+				{
+					if(!task_create_())
+					{
+						ELOG("Error!!!");//error
+					}
+				}
+			}
+			else
+			{
+				ELOG("Error!!!");				//error
+			}
 		}
-
-
-		//Revisar que el mensaje se halla encolado correctamente.
-		//configASSERT(&rv != NULL);
-		//Revisar que el valor del estado del botón esté dentro del rango esperado
-		//if(Received<0 &&Received>4) configASSERT(FALSE);
-
-		/*
-		 * Procesamiento de la notificación recibida
-		 *
-		 * SHORPRESSED: Invertir el estado del LED verde
-		 * LONGPRESSED: Invertir el estado del LED rojo.
-		 * BLOCKED: Encender el LED verde y LED rojo.
-		 * UNBLOCKED: Apagar el LED verde y el LED rojo.
-		 * NONE: No realiza nada.
-		 *
-		 */
+		else
+		{
+			ELOG("Error!!!");			//error
+		}
 
 	}
 }

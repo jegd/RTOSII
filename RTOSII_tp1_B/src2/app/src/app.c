@@ -49,15 +49,13 @@ void app_init( void ){
 			vQueueAddToRegistry( QueueBtnStatus, "QueueBtnStatus" );
 
 			/*Creación de colas*/
-			QueueLEDS = xQueueCreate(QUEUE_BUTTON_LENGHT,sizeof(color_led));
+			QueueLEDS = xQueueCreate(QUEUE_BUTTON_LENGHT,sizeof(codigo_t));
 
 			/* Check the queues was created successfully */
 			configASSERT( QueueLEDS != NULL );
 
 			/* We want this queue to be viewable in a RTOS kernel aware debugger, so register it. */
 			vQueueAddToRegistry( QueueLEDS, "QueueLEDS" );
-
-
 
 
 			BaseType_t ret;

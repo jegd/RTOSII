@@ -1,27 +1,24 @@
 /*
- * OA_SYS.h
+ *  OA_SYS.h
  *
- *  Created on: Dec 3, 2023
- *      Author: Jesus
+ *  @Created on: Dic 03, 2023
+ *  @Authors:  Anthony  Maisincho              N°SIU e2011
+ *             Jesus    Gonzales               N°SIU e2006
  */
 
 #ifndef APP_INC_OA_SYS_H_
 #define APP_INC_OA_SYS_H_
 
-#include "OA_BTN.h"
-#include "main.h"
-#include "cmsis_os.h"
-
+/****************************INCLUDES****************************/
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include "OA_BTN.h"
+#include "main.h"
+#include "cmsis_os.h"
 #include "eboard.h"
 #include "supporting_Functions.h"
-typedef enum {
-	GREEN,
-	RED
-} color_led;
-
+/****************************DEFINES Y MACROS****************************/
 typedef enum{
 	GREEN_ON,
 	RED_ON,
@@ -30,12 +27,7 @@ typedef enum{
 	BOTH_ON,
 	BOTH_OFF
 } codigo_t;
-
-typedef enum {
-	OFF,
-	ON
-} estado_led;
-
+/****************************FUNCIONES****************************/
 void vTask_OA_SYS(void *pvParameters);
 
 #endif /* APP_INC_OA_SYS_H_ */
