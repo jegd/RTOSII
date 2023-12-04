@@ -1,0 +1,5 @@
+../src2/lib/src/delayAntibloqueo.c:14:6:delayInit	1
+../src2/lib/src/delayAntibloqueo.c:20:8:delayRead	4
+../src2/lib/src/delayAntibloqueo.c:36:6:delayWrite	1
+../src2/lib/src/delayAntibloqueo.c:41:6:debounceFSM_init	1
+../src2/lib/src/delayAntibloqueo.c:47:6:debounceFSM_update	11

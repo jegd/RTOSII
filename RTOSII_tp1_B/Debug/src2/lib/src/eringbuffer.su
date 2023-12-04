@@ -1,0 +1,13 @@
+../src2/lib/src/eringbuffer.c:10:20:inc_idex_	16	static
+../src2/lib/src/eringbuffer.c:19:20:write_byte_	16	static
+../src2/lib/src/eringbuffer.c:26:20:read_byte_	16	static
+../src2/lib/src/eringbuffer.c:33:6:eringbuffer_init	24	static
+../src2/lib/src/eringbuffer.c:42:8:eringbuffer_size	16	static
+../src2/lib/src/eringbuffer.c:47:8:eringbuffer_len	16	static
+../src2/lib/src/eringbuffer.c:52:8:eringbuffer_free	16	static
+../src2/lib/src/eringbuffer.c:57:6:eringbuffer_is_full	16	static
+../src2/lib/src/eringbuffer.c:62:6:eringbuffer_is_empty	16	static
+../src2/lib/src/eringbuffer.c:67:8:eringbuffer_write_byte	16	static
+../src2/lib/src/eringbuffer.c:77:8:eringbuffer_write	32	static
+../src2/lib/src/eringbuffer.c:90:8:eringbuffer_read_byte	16	static
+../src2/lib/src/eringbuffer.c:100:8:eringbuffer_read	32	static

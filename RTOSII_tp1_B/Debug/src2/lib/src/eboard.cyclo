@@ -1,0 +1,32 @@
+D:/Especialidad sistemas embebidos UBA/RTOS (II)/Ejercicios/RTOSII_tp1_B/src2/hal/inc/eboard_port.h:82:6:euart_hal_receive	1
+D:/Especialidad sistemas embebidos UBA/RTOS (II)/Ejercicios/RTOSII_tp1_B/src2/hal/inc/eboard_port.h:87:6:euart_hal_send	1
+D:/Especialidad sistemas embebidos UBA/RTOS (II)/Ejercicios/RTOSII_tp1_B/src2/hal/inc/eboard_port.h:92:6:HAL_UART_ErrorCallback	1
+D:/Especialidad sistemas embebidos UBA/RTOS (II)/Ejercicios/RTOSII_tp1_B/src2/hal/inc/eboard_port.h:98:6:HAL_UARTEx_RxEventCallback	1
+D:/Especialidad sistemas embebidos UBA/RTOS (II)/Ejercicios/RTOSII_tp1_B/src2/hal/inc/eboard_port.h:103:6:HAL_UART_TxCpltCallback	1
+D:/Especialidad sistemas embebidos UBA/RTOS (II)/Ejercicios/RTOSII_tp1_B/src2/hal/inc/eboard_port.h:108:6:eboard_hal_port_gpio_write	1
+D:/Especialidad sistemas embebidos UBA/RTOS (II)/Ejercicios/RTOSII_tp1_B/src2/hal/inc/eboard_port.h:114:6:eboard_hal_port_gpio_read	1
+D:/Especialidad sistemas embebidos UBA/RTOS (II)/Ejercicios/RTOSII_tp1_B/src2/hal/inc/eboard_port.h:123:10:eboard_osal_port_get_time_ms	1
+D:/Especialidad sistemas embebidos UBA/RTOS (II)/Ejercicios/RTOSII_tp1_B/src2/hal/inc/eboard_port.h:128:10:eboard_osal_port_get_time	1
+D:/Especialidad sistemas embebidos UBA/RTOS (II)/Ejercicios/RTOSII_tp1_B/src2/hal/inc/eboard_port.h:133:6:eboard_osal_port_delay	1
+../src2/lib/src/eboard.c:91:6:eboard_uart_init	1
+../src2/lib/src/eboard.c:96:6:eboard_gpio_init	1
+../src2/lib/src/eboard.c:101:6:eboard_gpio_write	3
+../src2/lib/src/eboard.c:117:6:eboard_gpio_read	2
+../src2/lib/src/eboard.c:128:6:eboard_led_red	1
+../src2/lib/src/eboard.c:133:6:eboard_led_green	1
+../src2/lib/src/eboard.c:138:6:eboard_led_blue	1
+../src2/lib/src/eboard.c:143:6:eboard_switch	1
+../src2/lib/src/eboard.c:148:8:eboard_uart_tx_len	1
+../src2/lib/src/eboard.c:153:8:eboard_uart_write	1
+../src2/lib/src/eboard.c:158:8:eboard_uart_write_byte	1
+../src2/lib/src/eboard.c:163:8:eboard_uart_swrite	2
+../src2/lib/src/eboard.c:173:8:eboard_uart_swrite_line	1
+../src2/lib/src/eboard.c:180:8:eboard_uart_rx_len	1
+../src2/lib/src/eboard.c:185:8:eboard_uart_read	1
+../src2/lib/src/eboard.c:190:8:eboard_uart_read_byte	1
+../src2/lib/src/eboard.c:195:8:eboard_uart_sread	1
+../src2/lib/src/eboard.c:202:6:eboard_log	2
+../src2/lib/src/eboard.c:211:6:eboard_hal_port_uart_error	1
+../src2/lib/src/eboard.c:216:6:eboard_hal_port_uart_rx_irq	1
+../src2/lib/src/eboard.c:221:6:eboard_hal_port_uart_tx_irq	1
+../src2/lib/src/eboard.c:226:6:eboard_init	2

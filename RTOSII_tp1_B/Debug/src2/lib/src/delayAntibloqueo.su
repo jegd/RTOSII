@@ -1,0 +1,5 @@
+../src2/lib/src/delayAntibloqueo.c:14:6:delayInit	16	static
+../src2/lib/src/delayAntibloqueo.c:20:8:delayRead	16	static
+../src2/lib/src/delayAntibloqueo.c:36:6:delayWrite	16	static
+../src2/lib/src/delayAntibloqueo.c:41:6:debounceFSM_init	16	static
+../src2/lib/src/delayAntibloqueo.c:47:6:debounceFSM_update	16	static
