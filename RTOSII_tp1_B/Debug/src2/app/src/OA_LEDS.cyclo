@@ -1,5 +1,7 @@
-../src2/app/src/OA_LEDS.c:30:13:callbackLEDS	7
-../src2/app/src/OA_LEDS.c:59:13:task_delete_	1
-../src2/app/src/OA_LEDS.c:70:13:task_	2
-../src2/app/src/OA_LEDS.c:95:13:task_create_	3
-../src2/app/src/OA_LEDS.c:122:6:vTask_OA_LEDS	5
+../src2/app/src/OA_LEDS.c:49:13:callbackLEDS	9
+../src2/app/src/OA_LEDS.c:72:13:task_delete_	1
+../src2/app/src/OA_LEDS.c:83:13:task_	2
+../src2/app/src/OA_LEDS.c:108:13:task_create_	3
+../src2/app/src/OA_LEDS.c:135:13:sendtoQueueHijo	3
+../src2/app/src/OA_LEDS.c:158:13:decodificarLeds	7
+../src2/app/src/OA_LEDS.c:203:6:vTask_OA_LEDS	3

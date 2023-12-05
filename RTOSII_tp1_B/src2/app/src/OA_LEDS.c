@@ -13,13 +13,32 @@
 #define MAX_THREADS_ 1
 QueueHandle_t QueueLED_hijo;
 extern QueueHandle_t QueueLEDS;
+typedef enum{
+	ON,
+	OFF
+}estado_t;
+typedef enum{
+	RED,
+	GREEN
+}color_t;
+
+typedef struct{
+	estado_t estado;
+	color_t color;
+}led_t;
 static struct {
 	QueueHandle_t hclient_queue;
-	void (*callback)(codigo_t);
+	void (*callback)(led_t *);
 	size_t task_cnt;
 	size_t client_cnt;
 } atencion;
 #define TASK_PERIOD_MS_         (10)				//Tiempo que toma atender al led
+
+
+
+led_t infoLed;
+led_t infoLed2;
+
 /*!
  * @brief Callback para manejar los leds usando el código encolado
  *
@@ -27,28 +46,22 @@ static struct {
  *
  * @return Función del tipo void.
  */
-static void callbackLEDS(codigo_t cod) {
-	switch (cod) {
-	case GREEN_ON:
+static void callbackLEDS(led_t* leds) {
+	if(leds->color==GREEN && leds->estado==ON)
+	{
 		eboard_led_green(1);
-		break;
-	case GREEN_OFF:
+	}
+	else if(leds->color==GREEN && leds->estado==OFF)
+	{
 		eboard_led_green(0);
-		break;
-	case RED_ON:
+	}
+	else if(leds->color==RED && leds->estado==ON)
+	{
 		eboard_led_red(1);
-		break;
-	case RED_OFF:
+	}
+	else if(leds->color==RED && leds->estado==OFF)
+	{
 		eboard_led_red(0);
-		break;
-	case BOTH_ON:
-		eboard_led_red(1);
-		eboard_led_green(1);
-		break;
-	case BOTH_OFF:
-		eboard_led_red(0);
-		eboard_led_green(0);
-		break;
 	}
 }
 /*!
@@ -68,13 +81,13 @@ static void task_delete_(void) {
  * @return Función del tipo void.
  */
 static void task_(void *argument) {
-	codigo_t client;
+	led_t* client;
 	while (true) {
-		while (pdPASS == xQueueReceive(atencion.hclient_queue, &client, 0)) {
+		while (pdPASS == xQueueReceive(atencion.hclient_queue,&client , 0)) {
 			ELOG("Código del estado del led: [%i]", client);
 
 			atencion.client_cnt++;
-			ELOG("Cantidad de estados leds siendo atendidos: %d", atencion.client_cnt);
+			ELOG("Cantidad de estados leds siendo atendidos: %d", client->color);
 
 			atencion.callback(client);
 			//Tiempo que toma atender a un item led de la cola
@@ -115,6 +128,74 @@ static bool task_create_(void) {
 	}
 }
 /*!
+ * @brief Envía puntero a una estructura con los datos del led a atender
+ * @param[led_t *] La informacion del led.
+ * @return Función del tipo void.
+ */
+static void sendtoQueueHijo(led_t* leds)
+{
+	if (pdPASS== xQueueSend(atencion.hclient_queue,&leds, 0))
+			{
+				ELOG("Ingresa el cliente [%i] a la fila", codigo_recibido);
+				if (0 == atencion.task_cnt)
+				{
+					if(!task_create_())
+					{
+						ELOG("Error!!!");//error
+					}
+				}
+			}
+			else
+			{
+				ELOG("Error!!!");				//error
+			}
+}
+/*!
+ * @brief Decodifica el valor recibido
+ * @param[codigo_t ] Codigo recibido desde OA_SYS.
+ * @return Función del tipo void.
+ */
+static void decodificarLeds(codigo_t cod) {
+	switch (cod) {
+					case GREEN_ON:
+						infoLed.color = GREEN;
+						infoLed.estado=ON;
+						sendtoQueueHijo(&infoLed);
+						break;
+					case GREEN_OFF:
+						infoLed.color = GREEN;
+						infoLed.estado=OFF;
+						sendtoQueueHijo(&infoLed);
+						break;
+					case RED_ON:
+						infoLed.color = RED;
+						infoLed.estado=ON;
+						sendtoQueueHijo(&infoLed);
+						break;
+					case RED_OFF:
+						infoLed.color = RED;
+						infoLed.estado=OFF;
+						sendtoQueueHijo(&infoLed);
+						break;
+					case BOTH_ON:
+						infoLed.color = GREEN;
+						infoLed.estado=ON;
+						sendtoQueueHijo(&infoLed);
+						infoLed2.color = RED;
+						infoLed2.estado=ON;
+						sendtoQueueHijo(&infoLed2);
+						break;
+					case BOTH_OFF:
+						infoLed.color = GREEN;
+						infoLed.estado=OFF;
+						sendtoQueueHijo(&infoLed);
+						infoLed2.color = RED;
+						infoLed2.estado=OFF;
+						sendtoQueueHijo(&infoLed2);
+						break;
+					}
+}
+/*!
  * @brief Crea un task dinámico
  * @param[void *] Puntero a parámetros.
  * @return Función del tipo void.
@@ -124,7 +205,7 @@ void vTask_OA_LEDS(void *pvParameters) {
 	codigo_t codigo_recibido;
 
 	/*Creación de cola para task hijo*/
-	QueueLED_hijo = xQueueCreate(4, sizeof(codigo_t));
+	QueueLED_hijo = xQueueCreate(2, sizeof(led_t*));
 
 	/* Check the queues was created successfully */
 	configASSERT(QueueLED_hijo != NULL);
@@ -142,21 +223,7 @@ void vTask_OA_LEDS(void *pvParameters) {
 		 */
 		if (pdPASS == xQueueReceive(QueueLEDS, &codigo_recibido, 0))
 		{
-			if (pdPASS== xQueueSend(atencion.hclient_queue,(void* )&codigo_recibido, 0))
-			{
-				ELOG("Ingresa el cliente [%i] a la fila", codigo_recibido);
-				if (0 == atencion.task_cnt)
-				{
-					if(!task_create_())
-					{
-						ELOG("Error!!!");//error
-					}
-				}
-			}
-			else
-			{
-				ELOG("Error!!!");				//error
-			}
+			decodificarLeds(codigo_recibido);
 		}
 		else
 		{
